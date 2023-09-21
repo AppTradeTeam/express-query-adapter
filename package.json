@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "postinstall": "tsc -p ./packages/express-query-adapter/tsconfig.lib.json"
+    "postinstall": "npx tsc -p ./packages/express-query-adapter/tsconfig.lib.json"
   },
   "private": true,
   "dependencies": {
