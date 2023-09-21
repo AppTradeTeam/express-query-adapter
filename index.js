@@ -1,1 +1,1 @@
-module.exports = require('./dist/packages/express-query-adapter/src/index.js');
+module.exports = require('./packages/express-query-adapter/src');
