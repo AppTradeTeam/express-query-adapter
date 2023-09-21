@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "postinstall": "npx tsc packages/express-query-adapter/src/*.ts"
+    "postinstall": "npx tsc packages/express-query-adapter/src/**/*.ts"
   },
   "private": true,
   "dependencies": {
