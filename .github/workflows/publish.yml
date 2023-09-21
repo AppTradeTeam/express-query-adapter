@@ -1,0 +1,26 @@
+name: Publish
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: nrwl/nx-set-shas@v3
+      - run: npm ci
+      - name: Auth npm
+        run: |
+          echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' > .npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.DEPLOY_NPMJS }}
+
+      - run: npx nx workspace-lint
+      - run: npx nx affected --target=lint --parallel=3
+      - run: npx nx affected --target=test --parallel=3 --ci --code-coverage
+      - run: npx nx affected --target=build --parallel=3
+      - run: npx nx deploy express-query-adapter
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.DEPLOY_NPMJS }}
