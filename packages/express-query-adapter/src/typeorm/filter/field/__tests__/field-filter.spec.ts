@@ -35,7 +35,6 @@ describe('Test FieldFilter #buildQuery', () => {
       expect(built['where']['name']).toBe('value');
     });
 
-    // here
     it('should return a <contains> filter', () => {
       const fieldFilter = new FieldFilter({
         query: built,
@@ -53,7 +52,7 @@ describe('Test FieldFilter #buildQuery', () => {
         prop: 'name',
         lookup: LookupFilter.REGEX,
         value: 'value',
-        dialect: TypeORMQueryDialect.POSTGRESQL,
+        dialect: TypeORMQueryDialect.POSTGRES,
       });
       fieldFilter.buildQuery();
       expect(built['where']['name']).toEqual('~ value');
@@ -245,7 +244,6 @@ describe('Test FieldFilter #buildQuery', () => {
       });
     });
 
-    // here
     it('should return a <contains> filter', () => {
       const fieldFilter = new FieldFilter({
         query: built,

@@ -1,6 +1,6 @@
 export enum TypeORMQueryDialect {
   MONGODB = 'mongodb',
-  POSTGRESQL = 'postgresql'
+  POSTGRES = 'postgres'
 }
 
 export type TypeORMQueryDialectType = `${TypeORMQueryDialect}`;
