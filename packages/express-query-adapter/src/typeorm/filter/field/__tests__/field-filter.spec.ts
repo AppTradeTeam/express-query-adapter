@@ -35,6 +35,7 @@ describe('Test FieldFilter #buildQuery', () => {
       expect(built['where']['name']).toBe('value');
     });
 
+    // here
     it('should return a <contains> filter', () => {
       const fieldFilter = new FieldFilter({
         query: built,
@@ -44,6 +45,29 @@ describe('Test FieldFilter #buildQuery', () => {
       });
       fieldFilter.buildQuery();
       expect(built['where']['name']).toEqual(Like('%value%'));
+    });
+
+    it('should return a <regex> filter', () => {
+      const fieldFilter = new FieldFilter({
+        query: built,
+        prop: 'name',
+        lookup: LookupFilter.REGEX,
+        value: 'value',
+        dialect: TypeORMQueryDialect.POSTGRESQL,
+      });
+      fieldFilter.buildQuery();
+      expect(built['where']['name']).toEqual('~ value');
+    });
+
+    it('should return a <regex> filter', () => {
+      const fieldFilter = new FieldFilter({
+        query: built,
+        prop: 'name',
+        lookup: LookupFilter.REGEX,
+        value: 'value',
+      });
+      fieldFilter.buildQuery();
+      expect(built['where']['name']).toEqual('REGEXP value');
     });
 
     it('should return an <startswith> contains filter', () => {
@@ -221,11 +245,26 @@ describe('Test FieldFilter #buildQuery', () => {
       });
     });
 
+    // here
     it('should return a <contains> filter', () => {
       const fieldFilter = new FieldFilter({
         query: built,
         prop: 'name',
         lookup: LookupFilter.CONTAINS,
+        value: 'value',
+        dialect: TypeORMQueryDialect.MONGODB,
+      });
+      fieldFilter.buildQuery();
+      expect(built['where']).toStrictEqual({
+        $and: [{ name: { $regex: new RegExp('value') } }],
+      });
+    });
+
+    it('should return a <regex> filter', () => {
+      const fieldFilter = new FieldFilter({
+        query: built,
+        prop: 'name',
+        lookup: LookupFilter.REGEX,
         value: 'value',
         dialect: TypeORMQueryDialect.MONGODB,
       });

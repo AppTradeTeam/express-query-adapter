@@ -15,6 +15,7 @@ import {
   LowerThanLookup,
   LowerThanOrEqualLookup,
   StartsWithLookup,
+  RegexLookup,
 } from './lookups';
 import { TypeORMQueryDialect } from '../../query-dialect';
 
@@ -36,6 +37,7 @@ const LOOKUP_FILTER_MAP_FACTORY = (config: {
     [LookupFilter.GTE, new GreaterThanOrEqualLookup(config)],
     [LookupFilter.IN, new InLookup(config)],
     [LookupFilter.BETWEEN, new BetweenLookup(config)],
+    [LookupFilter.REGEX, new RegexLookup(config)]
   ]);
 
 export class LookupBuilderFactory {
