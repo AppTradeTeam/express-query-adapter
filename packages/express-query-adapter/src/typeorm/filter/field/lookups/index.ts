@@ -12,3 +12,4 @@ export * from './istarts-with';
 export * from './lt';
 export * from './lte';
 export * from './starts-with';
+export * from './regex';
