@@ -14,6 +14,7 @@ export enum LookupFilter {
   IN = 'in',
   BETWEEN = 'between',
   NOT = 'not',
+  REGEX = 'regex',
 }
 
 export enum LookupDelimiter {
