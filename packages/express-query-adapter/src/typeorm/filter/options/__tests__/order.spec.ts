@@ -10,6 +10,18 @@ describe('', () => {
   beforeEach(() => {
     profile = ENABLED_PROFILE;
   });
+  it('should attach "order" criteria with nested fields when <options.ordering.status> is "enabled"', () => {
+    profile.options.ordering.status = 'enabled';
+    qb = new TypeORMQueryBuilder({ profile });
+    expect(qb.build({ order: '+field1.field2' })).toEqual({
+      ...DEFAULT_PAGINATION,
+      order: {
+        field1: {
+          field2: 'ASC'
+        }
+      }
+    });
+  });
   it('should attach "order" criteria when <options.ordering.status> equals to "enabled"', () => {
     profile.options.ordering.status = 'enabled';
     qb = new TypeORMQueryBuilder({ profile });
