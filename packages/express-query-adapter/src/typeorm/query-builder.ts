@@ -35,6 +35,7 @@ export class TypeORMQueryBuilder extends QueryBuilder<TypeORMQuery> {
         {
           source: expressQuery,
           target: typeORMQuery,
+          dialect: this.dialect as TypeORMQueryDialect,
         },
         this.profile
       );
