@@ -80,8 +80,9 @@ export class FieldFilter extends AbstractFilter {
       // Handle nested fields for sql dialects
       const nestedFields = this.prop.split('.');
       if (nestedFields.length > 1) {
-        const nestedQuery = this.constructNestedObject(nestedFields, queryToAdd[this.prop]);
-        queryToAdd[this.prop] = nestedQuery;
+        const value = queryToAdd[this.prop]
+        delete queryToAdd[this.prop]
+        return this.constructNestedObject(nestedFields, value);
       }
     }
 
