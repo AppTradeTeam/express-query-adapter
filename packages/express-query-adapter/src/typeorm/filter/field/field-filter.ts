@@ -75,24 +75,12 @@ export class FieldFilter extends AbstractFilter {
         }
       } else {
         queryToAdd[this.prop] = Not(queryToAdd[this.prop]);
-        
-        // Handle nested fields with NOT operator for sql dialects
-        const nestedFields = this.prop.split('.');
-        if (nestedFields.length > 1) {
-          const lastField = nestedFields[nestedFields.length - 1];
-          const lastFieldQuery = builder.build(lastField, this.value);
-          const negatedLastFieldQuery = Not(lastFieldQuery[lastField]);
-          const nestedQuery = this.constructNestedObject(nestedFields.slice(0, nestedFields.length), negatedLastFieldQuery);
-          queryToAdd[this.prop] = nestedQuery;
-        }
       }
-    } else if (this.dialect !== TypeORMQueryDialect.MONGODB) {
-      // Handle nested fields without NOT operator for sql dialects
+    } if (this.dialect !== TypeORMQueryDialect.MONGODB) {
+      // Handle nested fields for sql dialects
       const nestedFields = this.prop.split('.');
       if (nestedFields.length > 1) {
-        const lastField = nestedFields[nestedFields.length - 1];
-        const lastFieldQuery = builder.build(lastField, this.value);
-        const nestedQuery = this.constructNestedObject(nestedFields.slice(0, nestedFields.length - 1), lastFieldQuery);
+        const nestedQuery = this.constructNestedObject(nestedFields, queryToAdd[this.prop]);
         queryToAdd[this.prop] = nestedQuery;
       }
     }
