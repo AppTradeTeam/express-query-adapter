@@ -35,6 +35,52 @@ describe('Test FieldFilter #buildQuery', () => {
       expect(built['where']['name']).toBe('value');
     });
 
+    it('should return an <exact> filter for nested fields', () => {
+      const fieldFilter = new FieldFilter({
+        query: built,
+        prop: 'field1.field2.name',
+        lookup: LookupFilter.EXACT,
+        value: 'value',
+      });
+      fieldFilter.buildQuery();
+      expect(built['where']['field1.field2.name']).toStrictEqual({"field1": {"field2": {"name": "value"}}});
+    });
+
+    it('should return an <contains> filter for nested fields', () => {
+      const fieldFilter = new FieldFilter({
+        query: built,
+        prop: 'field1.field2.name',
+        lookup: LookupFilter.CONTAINS,
+        value: 'value',
+      });
+      fieldFilter.buildQuery();
+      expect(built['where']['field1.field2.name']).toStrictEqual({"field1": {"field2": {"name": Like("%value%")}}});
+    });
+
+    it('should return an <not> filter for nested fields', () => {
+      const fieldFilter = new FieldFilter({
+        query: built,
+        prop: 'field1.field2.name',
+        lookup: LookupFilter.EXACT,
+        value: 'value',
+        notOperator: true,
+      });
+      fieldFilter.buildQuery();
+      expect(built['where']['field1.field2.name']).toStrictEqual({"field1": {"field2": {"name": Not("value")}}});
+    });
+
+    it('should return an <not contains> filter for nested fields', () => {
+      const fieldFilter = new FieldFilter({
+        query: built,
+        prop: 'field1.field2.name',
+        lookup: LookupFilter.CONTAINS,
+        value: 'value',
+        notOperator: true,
+      });
+      fieldFilter.buildQuery();
+      expect(built['where']['field1.field2.name']).toStrictEqual({"field1": {"field2": {"name": Not(Like("%value%"))}}});
+    });
+
     it('should return a <contains> filter', () => {
       const fieldFilter = new FieldFilter({
         query: built,

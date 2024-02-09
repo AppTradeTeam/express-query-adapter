@@ -1,5 +1,5 @@
 import { LookupBuilderFactory } from './lookup-builder-factory';
-import { Not, ObjectLiteral } from 'typeorm';
+import { FindOperator, Not, ObjectLiteral } from 'typeorm';
 import { AbstractFilter } from '../filter';
 import { LookupFilter } from './lookup.enum';
 import { ExpressQuery } from '../../../express-query';
@@ -13,6 +13,12 @@ interface FilterConfig {
   lookup: LookupFilter;
   value: string;
   notOperator?: boolean;
+}
+
+type FilterParam = FindOperator<unknown> | ObjectLiteral | FindOperator<Record<string, FindOperator<unknown> | ObjectLiteral>> 
+
+interface NestedObject {
+  [key: string]: FilterParam | NestedObject;
 }
 
 export class FieldFilter extends AbstractFilter {
@@ -69,8 +75,39 @@ export class FieldFilter extends AbstractFilter {
         }
       } else {
         queryToAdd[this.prop] = Not(queryToAdd[this.prop]);
+        
+        // Handle nested fields with NOT operator for sql dialects
+        const nestedFields = this.prop.split('.');
+        if (nestedFields.length > 1) {
+          const lastField = nestedFields[nestedFields.length - 1];
+          const lastFieldQuery = builder.build(lastField, this.value);
+          const negatedLastFieldQuery = Not(lastFieldQuery[lastField]);
+          const nestedQuery = this.constructNestedObject(nestedFields.slice(0, nestedFields.length), negatedLastFieldQuery);
+          queryToAdd[this.prop] = nestedQuery;
+        }
+      }
+    } else if (this.dialect !== TypeORMQueryDialect.MONGODB) {
+      // Handle nested fields without NOT operator for sql dialects
+      const nestedFields = this.prop.split('.');
+      if (nestedFields.length > 1) {
+        const lastField = nestedFields[nestedFields.length - 1];
+        const lastFieldQuery = builder.build(lastField, this.value);
+        const nestedQuery = this.constructNestedObject(nestedFields.slice(0, nestedFields.length - 1), lastFieldQuery);
+        queryToAdd[this.prop] = nestedQuery;
       }
     }
+
     return queryToAdd;
+  }
+
+  private constructNestedObject(nestedFields: string[], value: FilterParam): NestedObject {
+    const construct = (fields: string[], value: FilterParam): NestedObject => {
+      if (fields.length === 1) {
+        return { [fields[0]]: value };
+      }
+      const [currentField, ...remainingFields] = fields;
+      return { [currentField]: construct(remainingFields, value) };
+    };
+    return construct(nestedFields, value);
   }
 }
