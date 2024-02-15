@@ -57,6 +57,6 @@ export class FilterFactory {
   private isFieldFilter(key: string, dialect?: TypeORMQueryDialect): boolean {
     if (dialect === TypeORMQueryDialect.MONGODB) {
       return !key.startsWith('$');
-    } else return !key.includes(LookupDelimiter.RELATION_DELIMITER);
+    } else return true
   }
 }
