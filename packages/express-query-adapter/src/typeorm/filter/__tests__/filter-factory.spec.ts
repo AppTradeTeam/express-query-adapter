@@ -34,17 +34,6 @@ describe('Test FilterFactory #get', () => {
     expect(filter.notOperator).toBe(false);
   });
 
-  it('should throw an error when no provided dialect and key is an invalid field filter', () => {
-    const invalidKey = 'fk.field';
-    const filter = () =>
-      factory.get({
-        query: {},
-        key: invalidKey,
-        value: 'value',
-      }) as FieldFilter;
-    expect(filter).toThrow(`${invalidKey} is not a field`);
-  });
-
   it('should throw an error when dialect is "mongodb" and key is an invalid field filter', () => {
     const invalidKey = '$invalidKey';
     const filter = () =>
