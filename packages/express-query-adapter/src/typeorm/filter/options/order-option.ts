@@ -6,7 +6,6 @@ interface NestedObject {
   [key: string]: string | NestedObject;
 }
 
-
 export class OrderOption implements FilterOption {
   public setOption(query: FilterOptionQuery, profile: ConfigProfile, dialect: TypeORMQueryDialect): void {
     if (!this.isAuthorized(profile)) {
