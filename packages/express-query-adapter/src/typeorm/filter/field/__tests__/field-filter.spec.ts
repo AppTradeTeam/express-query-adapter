@@ -44,7 +44,9 @@ describe('Test FieldFilter #buildQuery', () => {
         notOperator: true,
       });
       fieldFilter.buildQuery();
-      expect(built['where']['field1']['field2']).toStrictEqual({"name": Not("value")});
+      expect(built['where']['field1']['field2']).toStrictEqual({
+        name: Not('value'),
+      });
     });
 
     it('should return an <not> filter for nested fields', () => {
@@ -55,7 +57,9 @@ describe('Test FieldFilter #buildQuery', () => {
         value: 'value',
       });
       fieldFilter.buildQuery();
-      expect(built['where']['field1']['field2']).toStrictEqual({"name": "value"});
+      expect(built['where']['field1']['field2']).toStrictEqual({
+        name: 'value',
+      });
     });
 
     it('should return a <contains> filter', () => {
@@ -509,10 +513,7 @@ describe('Test FieldFilter #buildQuery', () => {
       expect(built['where']).toStrictEqual({
         $and: [
           {
-            $and: [
-              { name: { $not: { $eq: 'value' } } },
-              { name: { $not: { $eq: 'value' } } },
-            ],
+            $nor: [{ name: { $eq: 'value' } }, { name: { $eq: 'value' } }],
           },
         ],
       });

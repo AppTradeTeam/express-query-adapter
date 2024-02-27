@@ -9,6 +9,7 @@ export abstract class LookupBuilder {
   }
   abstract build(
     prop: string,
-    value: string
+    value: string,
+    notOperator: boolean
   ): Record<string, FindOperator<unknown> | ObjectLiteral>;
 }
