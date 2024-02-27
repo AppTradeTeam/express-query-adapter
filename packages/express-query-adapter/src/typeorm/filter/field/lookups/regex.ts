@@ -1,16 +1,22 @@
-import { FindOptionsUtils } from 'typeorm';
+import { FindOptionsUtils, Not } from 'typeorm';
 import { LookupBuilder } from '../lookup';
 import { TypeORMQueryDialect } from '../../../query-dialect';
 
 export class RegexLookup extends LookupBuilder {
-  build(prop: string, value: string): Record<string, FindOptionsUtils> {
+  build(
+    prop: string,
+    value: string,
+    notOperator?: boolean
+  ): Record<string, FindOptionsUtils> {
     if (this.dialect === TypeORMQueryDialect.MONGODB) {
-      return { [prop]: { $regex: new RegExp(`${value}`) } };
+      const query = { $regex: new RegExp(`${value}`) };
+      return { [prop]: notOperator ? { $not: query } : query };
     } else if (this.dialect === TypeORMQueryDialect.POSTGRES) {
-      return { [prop]: `~ ${value}` };
+      const query = `~ ${value}`;
+      return { [prop]: notOperator ? Not(query) : query };
     } else {
-      return { [prop]: `REGEXP ${value}` };
+      const query = `REGEXP ${value}`;
+      return { [prop]: notOperator ? Not(query) : query };
     }
   }
 }
-

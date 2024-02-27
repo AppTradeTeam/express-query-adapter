@@ -1,16 +1,20 @@
-import { FindOptionsUtils, LessThan } from 'typeorm';
+import { FindOptionsUtils, LessThan, Not } from 'typeorm';
 import { LookupBuilder } from '../lookup';
 import { getParsedPrimitiveValue } from '../utils';
 import { TypeORMQueryDialect } from '../../../query-dialect';
 
 export class LowerThanLookup extends LookupBuilder {
-  build(prop: string, value: string): Record<string, FindOptionsUtils> {
+  build(
+    prop: string,
+    value: string,
+    notOperator?: boolean
+  ): Record<string, FindOptionsUtils> {
     if (this.dialect === TypeORMQueryDialect.MONGODB) {
-      return {
-        [prop]: { $lt: getParsedPrimitiveValue(value) },
-      };
+      const query = { $lt: getParsedPrimitiveValue(value) };
+      return { [prop]: notOperator ? { $not: query } : query };
     } else {
-      return { [prop]: LessThan(value) };
+      const query = LessThan(value);
+      return { [prop]: notOperator ? Not(query) : query };
     }
   }
 }

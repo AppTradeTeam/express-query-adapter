@@ -1,5 +1,5 @@
 import { LookupBuilderFactory } from './lookup-builder-factory';
-import { FindOperator, Not, ObjectLiteral } from 'typeorm';
+import { FindOperator, ObjectLiteral } from 'typeorm';
 import { AbstractFilter } from '../filter';
 import { LookupFilter } from './lookup.enum';
 import { ExpressQuery } from '../../../express-query';
@@ -15,7 +15,10 @@ interface FilterConfig {
   notOperator?: boolean;
 }
 
-type FilterParam = FindOperator<unknown> | ObjectLiteral | FindOperator<Record<string, FindOperator<unknown> | ObjectLiteral>> 
+type FilterParam =
+  | FindOperator<unknown>
+  | ObjectLiteral
+  | FindOperator<Record<string, FindOperator<unknown> | ObjectLiteral>>;
 
 interface NestedObject {
   [key: string]: FilterParam | NestedObject;
@@ -61,22 +64,9 @@ export class FieldFilter extends AbstractFilter {
       lookup: this.lookup,
       dialect: this.dialect,
     });
-    const queryToAdd = builder.build(this.prop, this.value);
-    if (this.notOperator) {
-      if (this.dialect === TypeORMQueryDialect.MONGODB) {
-        if (queryToAdd['$or']) {
-          // NOT (A OR B) = NOT A AND NOT B
-          queryToAdd['$and'] = (queryToAdd['$or'] as ObjectLiteral[]).map(
-            (q) => ({ [this.prop]: { $not: q[this.prop] } })
-          );
-          delete queryToAdd['$or'];
-        } else {
-          queryToAdd[this.prop] = { $not: queryToAdd[this.prop] };
-        }
-      } else {
-        queryToAdd[this.prop] = Not(queryToAdd[this.prop]);
-      }
-    } if (this.dialect !== TypeORMQueryDialect.MONGODB) {
+    const queryToAdd = builder.build(this.prop, this.value, this.notOperator);
+
+    if (this.dialect !== TypeORMQueryDialect.MONGODB) {
       // Handle nested fields for sql dialects
       const nestedFields = this.prop.split('.');
       if (nestedFields.length > 1) {
@@ -87,7 +77,10 @@ export class FieldFilter extends AbstractFilter {
     return queryToAdd;
   }
 
-  private constructNestedObject(nestedFields: string[], value: FilterParam): NestedObject {
+  private constructNestedObject(
+    nestedFields: string[],
+    value: FilterParam
+  ): NestedObject {
     const construct = (fields: string[], value: FilterParam): NestedObject => {
       if (fields.length === 1) {
         return { [fields[0]]: value };

@@ -1,16 +1,20 @@
-import { FindOptionsUtils, MoreThan } from 'typeorm';
+import { FindOptionsUtils, MoreThan, Not } from 'typeorm';
 import { LookupBuilder } from '../lookup';
 import { getParsedPrimitiveValue } from '../utils';
 import { TypeORMQueryDialect } from '../../../query-dialect';
 
 export class GreaterThanLookup extends LookupBuilder {
-  build(prop: string, value: string): Record<string, FindOptionsUtils> {
+  build(
+    prop: string,
+    value: string,
+    notOperator?: boolean
+  ): Record<string, FindOptionsUtils> {
     if (this.dialect === TypeORMQueryDialect.MONGODB) {
-      return {
-        [prop]: { $gt: getParsedPrimitiveValue(value) },
-      };
+      const query = { $gt: getParsedPrimitiveValue(value) };
+      return { [prop]: notOperator ? { $not: query } : query };
     } else {
-      return { [prop]: MoreThan(value) };
+      const query = MoreThan(value);
+      return { [prop]: notOperator ? Not(query) : query };
     }
   }
 }

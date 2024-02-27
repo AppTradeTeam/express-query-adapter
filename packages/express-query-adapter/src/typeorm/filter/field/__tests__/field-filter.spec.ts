@@ -44,7 +44,9 @@ describe('Test FieldFilter #buildQuery', () => {
         notOperator: true,
       });
       fieldFilter.buildQuery();
-      expect(built['where']['field1']['field2']).toStrictEqual({"name": Not("value")});
+      expect(built['where']['field1']['field2']).toStrictEqual({
+        name: Not('value'),
+      });
     });
 
     it('should return an <not> filter for nested fields', () => {
@@ -55,7 +57,9 @@ describe('Test FieldFilter #buildQuery', () => {
         value: 'value',
       });
       fieldFilter.buildQuery();
-      expect(built['where']['field1']['field2']).toStrictEqual({"name": "value"});
+      expect(built['where']['field1']['field2']).toStrictEqual({
+        name: 'value',
+      });
     });
 
     it('should return a <contains> filter', () => {
@@ -90,6 +94,70 @@ describe('Test FieldFilter #buildQuery', () => {
       });
       fieldFilter.buildQuery();
       expect(built['where']['name']).toEqual('REGEXP value');
+    });
+
+    it('should return an <has> filter for mongodb dialect', () => {
+      const fieldFilter = new FieldFilter({
+        query: built,
+        prop: 'foobar',
+        lookup: LookupFilter.HAS,
+        value: 'value,2',
+        dialect: TypeORMQueryDialect.MONGODB,
+      });
+      fieldFilter.buildQuery();
+      expect(built['where']).toStrictEqual({
+        $and: [
+          {
+            $or: [
+              {
+                $and: [{ foobar: 'value' }, { foobar: '2' }],
+              },
+              {
+                $and: [{ foobar: 'value' }, { foobar: 2 }],
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('should return the <has> filter negation for mongodb dialect', () => {
+      const fieldFilter = new FieldFilter({
+        query: built,
+        prop: 'foobar',
+        lookup: LookupFilter.HAS,
+        value: 'value,2',
+        dialect: TypeORMQueryDialect.MONGODB,
+        notOperator: true,
+      });
+      fieldFilter.buildQuery();
+      expect(built['where']).toStrictEqual({
+        $and: [
+          {
+            $nor: [
+              {
+                $and: [{ foobar: 'value' }, { foobar: '2' }],
+              },
+              {
+                $and: [{ foobar: 'value' }, { foobar: 2 }],
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('should throw error when using <has> filter with dialect different from mongodb', () => {
+      const fieldFilter = new FieldFilter({
+        query: built,
+        prop: 'name',
+        lookup: LookupFilter.HAS,
+        value: 'value',
+        dialect: TypeORMQueryDialect.POSTGRES,
+      });
+      expect(() => fieldFilter.buildQuery()).toThrow(
+        'Unsupported lookup for provided dialect.'
+      );
     });
 
     it('should return an <startswith> contains filter', () => {
@@ -509,10 +577,7 @@ describe('Test FieldFilter #buildQuery', () => {
       expect(built['where']).toStrictEqual({
         $and: [
           {
-            $and: [
-              { name: { $not: { $eq: 'value' } } },
-              { name: { $not: { $eq: 'value' } } },
-            ],
+            $nor: [{ name: { $eq: 'value' } }, { name: { $eq: 'value' } }],
           },
         ],
       });
